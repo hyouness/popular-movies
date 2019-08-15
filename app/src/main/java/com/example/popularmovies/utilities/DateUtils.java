@@ -7,7 +7,7 @@ import java.util.Locale;
 
 class DateUtils {
     private static final SimpleDateFormat originalSDF = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-    private static final SimpleDateFormat updatedSDF = new SimpleDateFormat("MMMMM dd, yyyy", Locale.US);
+    private static final SimpleDateFormat updatedSDF = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
     static String formatDate(String releaseDate) {
         try {

@@ -1,10 +1,9 @@
 package com.example.popularmovies;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -15,22 +14,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.utilities.JSONUtils;
 import com.example.popularmovies.utilities.NetworkUtils;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMovieItemClickListener {
 
     private static final String IS_MOST_POPULAR = "is_most_popular";
     private static final String PAGE_COUNT = "page_count";
-    private static Integer page = 1;
+    private Integer page = 1;
     private Boolean isMostPopular = true;
-    private static Boolean isLoading = false;
+    private Boolean isLoading = false;
 
     private ProgressBar progressBar;
     private TextView errorMessageTV;
@@ -47,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         errorMessageTV = findViewById(R.id.tv_error_message);
         recyclerView = findViewById(R.id.rv_movies);
 
-        adapter = new PopularMoviesAdapter();
+        adapter = new PopularMoviesAdapter(this);
 
         GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), getSpanCount());
         recyclerView.setLayoutManager(layoutManager);
@@ -73,6 +67,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
         loadMovies(isMostPopular);
+    }
+
+
+    int getPageNumber() {
+        return page;
+    }
+
+    void updateRecyclerView(List<Movie> movies) {
+        hideProgressBar();
+
+        if (movies.isEmpty() && page == 1) {
+            showErrorMessage();
+        } else {
+            hideErrorMessage();
+            if (page == 1) {
+                adapter.setMovies(movies);
+            } else {
+                isLoading = false;
+                adapter.addAll(movies);
+            }
+        }
     }
 
     private int getSpanCount() {
@@ -108,6 +123,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
     private void showErrorMessage() {
         recyclerView.setVisibility(View.INVISIBLE);
         errorMessageTV.setVisibility(View.VISIBLE);
@@ -116,54 +139,6 @@ public class MainActivity extends AppCompatActivity {
     private void hideErrorMessage() {
         errorMessageTV.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
-    }
-
-    static class FetchMoviesTask extends AsyncTask<Boolean, Void, List<Movie>> {
-        final WeakReference<MainActivity> activityWeakReference;
-
-        FetchMoviesTask (MainActivity activity) {
-            this.activityWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            activityWeakReference.get().progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(Boolean... options) {
-            List<Movie> movies = new ArrayList<>();
-            Context context = activityWeakReference.get().getApplicationContext();
-            try {
-                boolean isMostPopular = options[0];
-                URL url = NetworkUtils.buildUrl(isMostPopular, page);
-                String json = NetworkUtils.getHttpUrlResponse(url);
-                movies = JSONUtils.getMovies(json, context);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return movies;
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            super.onPostExecute(movies);
-            MainActivity mainActivity = activityWeakReference.get();
-            mainActivity.progressBar.setVisibility(View.INVISIBLE);
-
-            if (movies.isEmpty() && page == 1) {
-                mainActivity.showErrorMessage();
-            } else {
-                mainActivity.hideErrorMessage();
-                if (page == 1) {
-                    mainActivity.adapter.setMovies(movies);
-                } else {
-                    isLoading = false;
-                    mainActivity.adapter.addAll(movies);
-                }
-            }
-        }
     }
 
     @Override
@@ -183,20 +158,36 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        page = 1;
 
         if (id == R.id.sort_by_most_popular) {
-            isMostPopular = true;
-            loadMovies(true);
+            loadMostPopularMovies();
             return true;
         }
 
         if (id == R.id.sort_by_top_rated) {
-            isMostPopular = false;
-            loadMovies(false);
+            loadTopRatedMovies();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void loadTopRatedMovies() {
+        page = 1;
+        isMostPopular = false;
+        loadMovies(false);
+    }
+
+    private void loadMostPopularMovies() {
+        page = 1;
+        isMostPopular = true;
+        loadMovies(true);
+    }
+
+    @Override
+    public void onMovieClick(Movie movie) {
+        Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+        intent.putExtra(AppConstants.SELECTED_MOVIE, movie);
+        startActivity(intent);
     }
 }

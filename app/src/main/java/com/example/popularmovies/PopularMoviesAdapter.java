@@ -18,6 +18,12 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
 
     private List<Movie> movies = new ArrayList<>();
 
+    private final OnMovieItemClickListener onMovieItemClickListener;
+
+    PopularMoviesAdapter(OnMovieItemClickListener onMovieItemClickListener) {
+        this.onMovieItemClickListener = onMovieItemClickListener;
+    }
+
     @NonNull
     @Override
     public PopularMoviesViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -53,7 +59,7 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         }
     }
 
-    class PopularMoviesViewHolder extends RecyclerView.ViewHolder {
+    class PopularMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView movieIV;
         final TextView movieTitleTV;
 
@@ -62,6 +68,8 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
 
             movieIV = itemView.findViewById(R.id.iv_movie);
             movieTitleTV = itemView.findViewById(R.id.tv_movie_title);
+
+            itemView.setOnClickListener(this);
         }
 
         void bind(Movie movie) {
@@ -72,6 +80,11 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
                     .error(R.drawable.movie_placeholder)
                     .fit()
                     .into(movieIV);
+        }
+
+        @Override
+        public void onClick(View view) {
+            onMovieItemClickListener.onMovieClick(movies.get(getAdapterPosition()));
         }
     }
 }

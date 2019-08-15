@@ -1,21 +1,38 @@
 package com.example.popularmovies.model;
 
-public class Movie {
+import android.os.Parcel;
+import android.os.Parcelable;
 
+public class Movie implements Parcelable {
+
+    private long id;
     private String title;
     private String originalTitle;
     private String posterUrl;
     private String backdropImageUrl;
     private String overview;
-    private double rating;
+    private String rating;
     private String releaseDate;
+    private String voteCount;
 
     private Movie() {
 
     }
 
-    public static Builder newMovie(String title, String posterUrl) {
-        return new Builder(title, posterUrl);
+    private Movie(Parcel in) {
+        id = in.readLong();
+        title = in.readString();
+        originalTitle = in.readString();
+        posterUrl = in.readString();
+        backdropImageUrl = in.readString();
+        overview = in.readString();
+        rating = in.readString();
+        releaseDate = in.readString();
+        voteCount = in.readString();
+    }
+
+    public static Builder newMovie(long id, String title, String posterUrl) {
+        return new Builder(id, title, posterUrl);
     }
 
     public String getTitle() {
@@ -34,7 +51,7 @@ public class Movie {
         return overview;
     }
 
-    public double getRating() {
+    public String getRating() {
         return rating;
     }
 
@@ -42,16 +59,57 @@ public class Movie {
         return releaseDate;
     }
 
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public String getVoteCount() {
+        return voteCount;
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(id);
+        parcel.writeString(title);
+        parcel.writeString(originalTitle);
+        parcel.writeString(posterUrl);
+        parcel.writeString(backdropImageUrl);
+        parcel.writeString(overview);
+        parcel.writeString(rating);
+        parcel.writeString(releaseDate);
+        parcel.writeString(voteCount);
+    }
+
     public static class Builder {
-        private String title;
+        private final long id;
+        private final String title;
         private String originalTitle;
-        private String posterUrl;
+        private final String posterUrl;
         private String backdropImageUrl;
         private String overview;
-        private double rating;
+        private String rating;
         private String releaseDate;
+        private String voteCount;
 
-        Builder (String title, String posterUrl) {
+        Builder (long id, String title, String posterUrl) {
+            this.id = id;
             this.title = title;
             this.posterUrl = posterUrl;
         }
@@ -71,7 +129,7 @@ public class Movie {
             return this;
         }
 
-        public Builder rating(double rating) {
+        public Builder rating(String rating) {
             this.rating = rating;
             return this;
         }
@@ -81,8 +139,14 @@ public class Movie {
             return this;
         }
 
+        public Builder voteCount(String voteCount) {
+            this.voteCount = voteCount;
+            return this;
+        }
+
         public Movie build() {
             Movie movie = new Movie();
+            movie.id = id;
             movie.title = title;
             movie.originalTitle = originalTitle;
             movie.posterUrl = posterUrl;
@@ -90,6 +154,7 @@ public class Movie {
             movie.backdropImageUrl = backdropImageUrl;
             movie.rating = rating;
             movie.releaseDate = releaseDate;
+            movie.voteCount = voteCount;
             return movie;
         }
     }

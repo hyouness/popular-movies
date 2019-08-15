@@ -6,4 +6,6 @@
     <color name="title_gradient_start_color">#b0efefef</color>
     <color name="title_gradient_end_color">#dd000000</color>
     <color name="scrollbarColor">#aa00574B</color>
+    <color name="poster_gradient_start_color">#55555555</color>
+    <color name="poster_gradient_end_color">#55000000</color>
 </resources>
