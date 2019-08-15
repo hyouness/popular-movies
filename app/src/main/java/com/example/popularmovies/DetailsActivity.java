@@ -2,7 +2,6 @@ package com.example.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,9 +14,6 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-
-        //noinspection ConstantConditions
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Movie movie = getIntent().getParcelableExtra(AppConstants.SELECTED_MOVIE);
 
@@ -82,15 +78,5 @@ public class DetailsActivity extends AppCompatActivity {
                 .error(R.drawable.movie_placeholder)
                 .fit()
                 .into(posterIV);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

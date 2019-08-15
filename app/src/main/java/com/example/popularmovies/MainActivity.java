@@ -3,6 +3,7 @@ package com.example.popularmovies;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,12 +17,15 @@ import android.widget.Toast;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.utilities.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMovieItemClickListener {
 
     private static final String IS_MOST_POPULAR = "is_most_popular";
     private static final String PAGE_COUNT = "page_count";
+    private static final String MOVIES = "movies";
+
     private Integer page = 1;
     private Boolean isMostPopular = true;
     private Boolean isLoading = false;
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
             isMostPopular = savedInstanceState.getBoolean(IS_MOST_POPULAR);
             setTitle(isMostPopular ? "Popular Movies" : "Rated Movies");
             page = savedInstanceState.getInt(PAGE_COUNT);
+            adapter.setMovies(savedInstanceState.<Movie>getParcelableArrayList(MOVIES));
+        } else {
+            loadMovies(isMostPopular);
         }
 
         recyclerView.addOnScrollListener(new PagingScrollListener(layoutManager) {
@@ -65,8 +72,6 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
             @Override
             public boolean isLoading() { return isLoading; }
         });
-
-        loadMovies(isMostPopular);
     }
 
 
@@ -145,7 +150,8 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_MOST_POPULAR, isMostPopular);
-        outState.putInt(PAGE_COUNT, 1);
+        outState.putInt(PAGE_COUNT, page);
+        outState.putParcelableArrayList(MOVIES, (ArrayList<Movie>) adapter.getMovies());
     }
 
     @Override

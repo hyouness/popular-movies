@@ -59,6 +59,10 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         }
     }
 
+    List<Movie> getMovies() {
+        return movies;
+    }
+
     class PopularMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView movieIV;
         final TextView movieTitleTV;
