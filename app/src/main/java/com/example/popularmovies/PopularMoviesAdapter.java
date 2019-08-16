@@ -14,6 +14,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdapter.PopularMoviesViewHolder> {
 
     private List<Movie> movies = new ArrayList<>();
@@ -64,14 +67,14 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
     }
 
     class PopularMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final ImageView movieIV;
-        final TextView movieTitleTV;
+        @BindView(R.id.iv_movie)
+        ImageView movieIV;
+        @BindView(R.id.tv_movie_title)
+        TextView movieTitleTV;
 
         PopularMoviesViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            movieIV = itemView.findViewById(R.id.iv_movie);
-            movieTitleTV = itemView.findViewById(R.id.tv_movie_title);
+            ButterKnife.bind(this, itemView);
 
             itemView.setOnClickListener(this);
         }

@@ -20,6 +20,9 @@ import com.example.popularmovies.utilities.NetworkUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements OnMovieItemClickListener {
 
     private static final String IS_MOST_POPULAR = "is_most_popular";
@@ -30,22 +33,23 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
     private Boolean isMostPopular = true;
     private Boolean isLoading = false;
 
+    @BindView(R.id.pb_rv)
     private ProgressBar progressBar;
+    @BindView(R.id.tv_error_message)
     private TextView errorMessageTV;
+    @BindView(R.id.rv_movies)
     private RecyclerView recyclerView;
+    @BindView(R.id.frameLayout)
+    private FrameLayout frameLayout;
+
     private PopularMoviesAdapter adapter;
     private Snackbar snackBar;
-    private FrameLayout frameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        progressBar = findViewById(R.id.pb_rv);
-        errorMessageTV = findViewById(R.id.tv_error_message);
-        recyclerView = findViewById(R.id.rv_movies);
-        frameLayout = findViewById(R.id.frameLayout);
+        ButterKnife.bind(this);
 
         adapter = new PopularMoviesAdapter(this);
 
