@@ -34,13 +34,13 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
     private Boolean isLoading = false;
 
     @BindView(R.id.pb_rv)
-    private ProgressBar progressBar;
+    ProgressBar progressBar;
     @BindView(R.id.tv_error_message)
-    private TextView errorMessageTV;
+    TextView errorMessageTV;
     @BindView(R.id.rv_movies)
-    private RecyclerView recyclerView;
+    RecyclerView recyclerView;
     @BindView(R.id.frameLayout)
-    private FrameLayout frameLayout;
+    FrameLayout frameLayout;
 
     private PopularMoviesAdapter adapter;
     private Snackbar snackBar;

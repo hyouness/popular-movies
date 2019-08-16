@@ -16,6 +16,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdapter.PopularMoviesViewHolder> {
 
@@ -66,7 +67,7 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         return movies;
     }
 
-    class PopularMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class PopularMoviesViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.iv_movie)
         ImageView movieIV;
         @BindView(R.id.tv_movie_title)
@@ -75,8 +76,6 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         PopularMoviesViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-
-            itemView.setOnClickListener(this);
         }
 
         void bind(Movie movie) {
@@ -89,8 +88,8 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
                     .into(movieIV);
         }
 
-        @Override
-        public void onClick(View view) {
+        @OnClick
+        void onClick(View view) {
             onMovieItemClickListener.onMovieClick(movies.get(getAdapterPosition()));
         }
     }
