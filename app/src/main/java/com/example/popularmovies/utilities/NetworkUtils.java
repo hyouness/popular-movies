@@ -14,7 +14,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
-public class NetworkUtils {
+final public class NetworkUtils {
+
+    private NetworkUtils() {}
 
     public static URL buildUrl(boolean mostPopular, int page) throws MalformedURLException {
         String url = String.format(AppConstants.MOVIES_URL, mostPopular ? "popular" : "top_rated", page);
