@@ -1,4 +1,4 @@
-# Sandwich Club Project
+# Popular Movies Project
 
 ## Project Overview
 In Project 2 of the Udacity Android Developer Nanodegree Program, **Popular Movies** app was developed in order to
