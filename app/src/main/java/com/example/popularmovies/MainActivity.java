@@ -3,16 +3,16 @@ package com.example.popularmovies;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.utilities.NetworkUtils;
@@ -34,7 +34,8 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
     private TextView errorMessageTV;
     private RecyclerView recyclerView;
     private PopularMoviesAdapter adapter;
-    private Toast toast;
+    private Snackbar snackBar;
+    private FrameLayout frameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         progressBar = findViewById(R.id.pb_rv);
         errorMessageTV = findViewById(R.id.tv_error_message);
         recyclerView = findViewById(R.id.rv_movies);
+        frameLayout = findViewById(R.id.frameLayout);
 
         adapter = new PopularMoviesAdapter(this);
 
@@ -121,10 +123,10 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
             recyclerView.setVisibility(page == 1 ? View.INVISIBLE : View.VISIBLE);
             new FetchMoviesTask(this).execute(isMostPopular);
         } else {
-            if (toast == null) {
-                toast = Toast.makeText(getApplicationContext(), "Check your internet connection and Retry.", Toast.LENGTH_LONG);
+            if (snackBar == null) {
+                snackBar = Snackbar.make(frameLayout, "Check your internet connection and Retry.", Snackbar.LENGTH_LONG);
             }
-            toast.show();
+            snackBar.show();
         }
     }
 
