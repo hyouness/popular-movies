@@ -5,9 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-class DateUtils {
+final class DateUtils {
     private static final SimpleDateFormat originalSDF = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat updatedSDF = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+
+    private DateUtils() {}
 
     static String formatDate(String releaseDate) {
         try {

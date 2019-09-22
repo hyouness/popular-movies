@@ -3,10 +3,12 @@ package com.example.popularmovies;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,13 +17,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.utilities.NetworkUtils;
+import com.example.popularmovies.model.MovieList;
+import com.example.popularmovies.service.MovieApiService;
+import com.example.popularmovies.utilities.RetrofitUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements OnMovieItemClickListener {
 
@@ -80,14 +87,11 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         });
     }
 
-
     int getPageNumber() {
         return page;
     }
 
     void updateRecyclerView(List<Movie> movies) {
-        hideProgressBar();
-
         if (movies.isEmpty() && page == 1) {
             showErrorMessage();
         } else {
@@ -120,19 +124,55 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
 
     @SuppressLint("ShowToast")
     private void loadMovies(boolean isMostPopular) {
-        boolean isOnline = NetworkUtils.isOnline(getApplicationContext());
+        boolean isOnline = RetrofitUtils.isOnline(getApplicationContext());
         if (isOnline) {
             hideErrorMessage();
             setTitle(isMostPopular ? "Popular Movies" : "Rated Movies");
             recyclerView.setVisibility(page == 1 ? View.INVISIBLE : View.VISIBLE);
-            new FetchMoviesTask(this).execute(isMostPopular);
+            queryMoviesService(isMostPopular);
         } else {
-            if (snackBar == null) {
-                snackBar = Snackbar.make(frameLayout, "Check your internet connection and Retry.", Snackbar.LENGTH_LONG);
-            }
-            snackBar.show();
+            isLoading = false;
+            checkInternetConnection();
         }
     }
+
+    private void checkInternetConnection() {
+        if (snackBar == null) {
+            snackBar = Snackbar.make(frameLayout, "Check your internet connection and Retry.", Snackbar.LENGTH_LONG);
+        }
+        snackBar.show();
+    }
+
+    private void queryMoviesService(boolean isMostPopular) {
+        showProgressBar();
+
+        MovieApiService movieService = RetrofitUtils.getMovieService(getApplicationContext());
+        Call<MovieList> moviesCall = movieService.getMovies(isMostPopular ? "popular" : "top_rated", getPageNumber(), AppConstants.API_KEY);
+        moviesCall.enqueue(new Callback<MovieList>() {
+            @Override
+            public void onResponse(@NonNull Call<MovieList> call, @NonNull Response<MovieList> movieListResponse) {
+                hideProgressBar();
+                if (movieListResponse.isSuccessful()) {
+                    assert movieListResponse.body() != null;
+                    updateRecyclerView(movieListResponse.body().getMovies());
+                } else if (!RetrofitUtils.isOnline(getApplicationContext())) {
+                    checkInternetConnection();
+                }
+                isLoading = false;
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MovieList> call, @NonNull Throwable t) {
+                hideProgressBar();
+                Log.d(MainActivity.class.getSimpleName(), t.getMessage(), t);
+                if (!RetrofitUtils.isOnline(getApplicationContext())) {
+                    checkInternetConnection();
+                }
+                isLoading = false;
+            }
+        });
+    }
+
 
     void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
