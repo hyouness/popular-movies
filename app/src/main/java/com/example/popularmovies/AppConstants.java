@@ -1,7 +1,7 @@
 package com.example.popularmovies;
 
 public class AppConstants {
-    static final String API_KEY = "";
+    public static final String API_KEY = "";
     public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
     public static final String BASE_URL = "https://api.themoviedb.org/3/movie/";
 

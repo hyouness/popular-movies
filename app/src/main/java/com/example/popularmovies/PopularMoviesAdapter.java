@@ -52,21 +52,6 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         notifyDataSetChanged();
     }
 
-    private void addMovie(Movie movie) {
-        movies.add(movie);
-        notifyItemInserted(movies.size() - 1);
-    }
-
-    void addAll(List<Movie> newMovies) {
-        for (Movie movie : newMovies) {
-            addMovie(movie);
-        }
-    }
-
-    List<Movie> getMovies() {
-        return movies;
-    }
-
     class PopularMoviesViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.iv_movie)
         ImageView movieIV;
