@@ -24,6 +24,16 @@
                 android:layout_gravity="bottom|start"
                 android:contentDescription="@string/movie_poster" />
 
+            <ImageButton
+                android:id="@+id/favorite_movie"
+                android:layout_width="@dimen/favorite_icon_width"
+                android:layout_height="@dimen/favorite_icon_height"
+                android:src="@android:drawable/btn_star_big_off"
+                android:scaleType="center"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bookmark"
+                android:contentDescription="@string/favorite_movie_icon"/>
+
             <ImageView
                 android:id="@+id/iv_movie_poster"
                 android:layout_width="@dimen/details_poster_port_width"

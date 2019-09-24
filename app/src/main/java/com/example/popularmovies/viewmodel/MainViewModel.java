@@ -1,11 +1,13 @@
 package com.example.popularmovies.viewmodel;
 
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.example.popularmovies.AppConstants;
+import com.example.popularmovies.database.AppDatabase;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.model.MovieList;
 import com.example.popularmovies.service.MovieApiService;
@@ -18,28 +20,36 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainViewModel extends ViewModel {
-    private MutableLiveData<List<Movie>> movies = new MutableLiveData<>();
-    private boolean currentSelection = true;
-    private Integer currentPage = 1;
+public class MainViewModel extends AndroidViewModel {
+    public static final String POPULAR = "popular";
+    public static final String TOP_RATED = "top_rated";
+    public static final String FAVORITES = "favorites";
 
-    public MainViewModel() {
+    private MutableLiveData<List<Movie>> movies = new MutableLiveData<>();
+    private LiveData<List<Movie>> favoriteMovies;
+    private String currentSearchType = POPULAR;
+    private Integer currentPage = 1;
+    private MovieApiService movieService;
+
+
+    public MainViewModel(@NonNull Application application) {
+        super(application);
+        movieService = RetrofitUtils.getMovieService(application.getApplicationContext());
+        AppDatabase appDatabase = AppDatabase.getInstance(application.getApplicationContext());
+        favoriteMovies = appDatabase.movieDao().loadFavoriteMovies();
     }
 
-    public MutableLiveData<List<Movie>> getMovies(Context context, Integer page, boolean isMostPopular) {
-        System.out.println(String.format("getMovies::: currentPage: %s - currentSelection: %s", currentPage, currentSelection));
-        System.out.println(String.format("getMovies::: page: %s - isMostPopular: %s", page, isMostPopular));
-        if (movies.getValue() == null || currentSelection != isMostPopular || !currentPage.equals(page)) {
+    public MutableLiveData<List<Movie>> getMovies(Integer page, String searchType) {
+        if (movies.getValue() == null || !currentSearchType.equals(searchType) || !currentPage.equals(page)) {
             currentPage = page;
-            currentSelection = isMostPopular;
-            loadMovies(context);
+            currentSearchType = searchType;
+            loadMovies();
         }
         return movies;
     }
 
-    private void loadMovies(Context context) {
-        MovieApiService movieService = RetrofitUtils.getMovieService(context);
-        Call<MovieList> moviesCall = movieService.getMovies(currentSelection ? "popular" : "top_rated", currentPage, AppConstants.API_KEY);
+    private void loadMovies() {
+        Call<MovieList> moviesCall = movieService.getMovies(currentSearchType, currentPage, AppConstants.API_KEY);
         moviesCall.enqueue(new Callback<MovieList>() {
             @Override
             public void onResponse(@NonNull Call<MovieList> call, @NonNull Response<MovieList> response) {
@@ -57,13 +67,23 @@ public class MainViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<MovieList> call, @NonNull Throwable t) {
-
+                movies.setValue(movies.getValue());
             }
         });
     }
 
-    public boolean isCurrentSelection() {
-        return currentSelection;
+
+    public MutableLiveData<List<Movie>> getMovies() {
+        return movies;
+    }
+
+    public LiveData<List<Movie>> getFavoriteMovies() {
+        currentSearchType = FAVORITES;
+        return favoriteMovies;
+    }
+
+    public String getCurrentSearchType() {
+        return currentSearchType;
     }
 
     public Integer getCurrentPage() {

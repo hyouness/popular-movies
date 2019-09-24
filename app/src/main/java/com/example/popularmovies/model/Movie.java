@@ -1,10 +1,16 @@
 package com.example.popularmovies.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
+@Entity(tableName = "movie")
 public class Movie implements Parcelable {
 
+    @PrimaryKey
     private long id;
     private String title;
     private String originalTitle;
@@ -14,8 +20,9 @@ public class Movie implements Parcelable {
     private String rating;
     private String releaseDate;
     private String voteCount;
+    private Date bookmarkDate;
 
-    private Movie() {
+    public Movie() {
 
     }
 
@@ -35,36 +42,84 @@ public class Movie implements Parcelable {
         return new Builder(id, title, posterUrl);
     }
 
+    public void setId(Long id) {
+        this.id =  id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
     public String getTitle() {
         return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getPosterUrl() {
         return posterUrl;
     }
 
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
     public String getBackdropImageUrl() {
         return backdropImageUrl;
+    }
+
+    public void setBackdropImageUrl(String backdropImageUrl) {
+        this.backdropImageUrl = backdropImageUrl;
     }
 
     public String getOverview() {
         return overview;
     }
 
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
     public String getRating() {
         return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
     }
 
     public String getReleaseDate() {
         return releaseDate;
     }
 
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
     public String getOriginalTitle() {
         return originalTitle;
     }
 
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
     public String getVoteCount() {
         return voteCount;
+    }
+
+    public void setVoteCount(String voteCount) {
+        this.voteCount = voteCount;
+    }
+
+    public Date getBookmarkDate() {
+        return bookmarkDate;
+    }
+
+    public void setBookmarkDate(Date bookmarkDate) {
+        this.bookmarkDate = bookmarkDate;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {

@@ -1,6 +1,5 @@
 package com.example.popularmovies;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -42,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
     private PopularMoviesAdapter adapter;
     private Snackbar snackBar;
     private MainViewModel viewModel;
+    private Observer<List<Movie>> favoriteMoviesObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +60,9 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         recyclerView.addOnScrollListener(new PagingScrollListener(layoutManager) {
             @Override
             protected void loadMoreItems() {
-                if (!isLoading) {
+                if (!isLoading && !viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
                     isLoading = true;
-                    loadMovies(viewModel.isCurrentSelection(), viewModel.getCurrentPage() + 1);
+                    loadMovies(viewModel.getCurrentSearchType(), viewModel.getCurrentPage() + 1);
                 }
             }
 
@@ -70,23 +70,43 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
             public boolean isLoading() { return isLoading; }
         });
 
-        viewModel.getMovies(getApplicationContext(), viewModel.getCurrentPage(), viewModel.isCurrentSelection()).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                hideProgressBar();
-                if (movies != null && !movies.isEmpty()) {
-                    updateRecyclerView(movies);
-                } else if (!RetrofitUtils.isOnline(getApplicationContext())) {
-                    checkInternetConnection();
-                }
-                isLoading = false;
+        if (viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
+            queryMoviesDatabase();
+        } else {
+            if (RetrofitUtils.isOnline(getApplicationContext())) {
+                queryMoviesService(viewModel.getCurrentSearchType(), viewModel.getCurrentPage());
+            } else if (viewModel.getMovies().getValue() == null || viewModel.getMovies().getValue().isEmpty()){
+                showErrorMessage(R.string.error_message);
             }
-        });
+        }
+    }
+
+    private void queryMoviesDatabase() {
+        setTitle(getTitle(MainViewModel.FAVORITES));
+        showProgressBar();
+        if (!viewModel.getFavoriteMovies().hasObservers()) {
+            favoriteMoviesObserver = new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(@Nullable List<Movie> movies) {
+                    if (viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
+                        hideProgressBar();
+                        if (movies != null && !movies.isEmpty()) {
+                            updateRecyclerView(movies);
+                        } else {
+                            showErrorMessage(R.string.no_favorites);
+                        }
+                    }
+                }
+            };
+            viewModel.getFavoriteMovies().observe(this, favoriteMoviesObserver);
+        } else {
+            favoriteMoviesObserver.onChanged(viewModel.getFavoriteMovies().getValue());
+        }
     }
 
     void updateRecyclerView(List<Movie> movies) {
         if (movies.isEmpty() && viewModel.getCurrentPage() == 1) {
-            showErrorMessage();
+            showErrorMessage(R.string.error_message);
         } else {
             hideErrorMessage();
             if (viewModel.getCurrentPage() == 1) {
@@ -115,19 +135,24 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         return spanCount;
     }
 
-    @SuppressLint("ShowToast")
-    private void loadMovies(boolean isMostPopular, Integer page) {
+    private void loadMovies(String searchType, Integer page) {
         isLoading = true;
         boolean isOnline = RetrofitUtils.isOnline(getApplicationContext());
         if (isOnline) {
             hideErrorMessage();
-            setTitle(isMostPopular ? "Popular Movies" : "Rated Movies");
+            setTitle(getTitle(searchType));
             recyclerView.setVisibility(page == 1 ? View.INVISIBLE : View.VISIBLE);
-            queryMoviesService(isMostPopular, page);
+            queryMoviesService(searchType, page);
         } else {
             isLoading = false;
             checkInternetConnection();
         }
+    }
+
+    private static String getTitle(String searchType) {
+        if (searchType.equals(MainViewModel.POPULAR)) return "Popular Movies";
+        else if (searchType.equals(MainViewModel.TOP_RATED)) return "Rated Movies";
+        else return "Favorite Movies";
     }
 
     private void checkInternetConnection() {
@@ -137,9 +162,24 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         snackBar.show();
     }
 
-    private void queryMoviesService(boolean isMostPopular, Integer page) {
+    private void queryMoviesService(String searchType, Integer page) {
         showProgressBar();
-        viewModel.getMovies(getApplicationContext(), page, isMostPopular);
+        if (!viewModel.getMovies().hasObservers()) {
+            viewModel.getMovies(page, searchType).observe(this, new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(@Nullable List<Movie> movies) {
+                    hideProgressBar();
+                    if (movies != null && !movies.isEmpty()) {
+                        updateRecyclerView(movies);
+                    } else if (!RetrofitUtils.isOnline(getApplicationContext())) {
+                        checkInternetConnection();
+                    }
+                    isLoading = false;
+                }
+            });
+        } else {
+            viewModel.getMovies(page, searchType);
+        }
     }
 
     void showProgressBar() {
@@ -150,8 +190,9 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         progressBar.setVisibility(View.INVISIBLE);
     }
 
-    private void showErrorMessage() {
+    private void showErrorMessage(int message) {
         recyclerView.setVisibility(View.INVISIBLE);
+        errorMessageTV.setText(message);
         errorMessageTV.setVisibility(View.VISIBLE);
     }
 
@@ -180,15 +221,20 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
             return true;
         }
 
+        if (id == R.id.sort_by_favorites) {
+            queryMoviesDatabase();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
     private void loadTopRatedMovies() {
-        loadMovies(false, 1);
+        loadMovies(MainViewModel.TOP_RATED, 1);
     }
 
     private void loadMostPopularMovies() {
-        loadMovies(true, 1);
+        loadMovies(MainViewModel.POPULAR, 1);
     }
 
     @Override

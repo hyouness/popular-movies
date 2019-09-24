@@ -2,13 +2,20 @@ package com.example.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.popularmovies.database.AppDatabase;
 import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.utilities.AppExecutors;
 import com.squareup.picasso.Picasso;
 
+import java.util.Date;
+
 public class DetailsActivity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +25,8 @@ public class DetailsActivity extends AppCompatActivity {
         Movie movie = getIntent().getParcelableExtra(AppConstants.SELECTED_MOVIE);
 
         setTitle(movie.getTitle());
+
+        initFavoriteButton(movie);
 
         populatePosterView(movie.getPosterUrl());
 
@@ -33,6 +42,41 @@ public class DetailsActivity extends AppCompatActivity {
         // was inspired by: https://is1-ssl.mzstatic.com/image/thumb/Purple49/v4/c0/6b/35/c06b358f-33b2-b1d5-530c-c3c36babda85/pr_source.png/696x696bb.png
         populateRatingView(String.valueOf(movie.getRating()));
         populateVoteCountView(movie.getVoteCount());
+    }
+
+    private void initFavoriteButton(final Movie movie) {
+        final ImageButton imageButton = findViewById(R.id.favorite_movie);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean isFavorite = AppDatabase.getInstance(getApplicationContext()).movieDao().isFavoriteMovie(movie.getId());
+                int drawableId = isFavorite ? android.R.drawable.btn_star_big_on : android.R.drawable.btn_star_big_off;
+                imageButton.setImageResource(drawableId);
+                imageButton.setTag(drawableId);
+            }
+        });
+
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int drawableId = (int) imageButton.getTag();
+                        if (drawableId == android.R.drawable.btn_star_big_off) {
+                            drawableId = android.R.drawable.btn_star_big_on;
+                            movie.setBookmarkDate(new Date());
+                            AppDatabase.getInstance(getApplicationContext()).movieDao().insertMovie(movie);
+                        } else {
+                            drawableId = android.R.drawable.btn_star_big_off;
+                            AppDatabase.getInstance(getApplicationContext()).movieDao().deleteMovie(movie);
+                        }
+                        imageButton.setImageResource(drawableId);
+                        imageButton.setTag(drawableId);
+                    }
+                });
+            }
+        });
     }
 
     private void populateVoteCountView(String voteCount) {
