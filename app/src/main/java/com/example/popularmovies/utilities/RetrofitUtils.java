@@ -36,8 +36,9 @@ final public class RetrofitUtils {
                     .readTimeout(30, TimeUnit.SECONDS).build();
 
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Movie>>(){}.getType(), new MovieListDeserializer(context.getResources().getBoolean(R.bool.isTablet)));
-            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Video>>(){}.getType(), new VideoListDeserializer());
+            boolean isTablet = context.getResources().getBoolean(R.bool.isTablet);
+            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Movie>>(){}.getType(), new MovieListDeserializer(isTablet));
+            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Video>>(){}.getType(), new VideoListDeserializer(isTablet));
             gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Review>>(){}.getType(), new ReviewListDeserializer(getMarkdownProcessor(context)));
 
             retrofit = new Retrofit.Builder()

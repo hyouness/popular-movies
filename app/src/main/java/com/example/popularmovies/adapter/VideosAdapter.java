@@ -5,13 +5,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.example.popularmovies.R;
 import com.example.popularmovies.model.Video;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -29,7 +33,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideosView
     @Override
     public VideosViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-        View view = inflater.inflate(R.layout.movies_list_item, viewGroup, false);
+        View view = inflater.inflate(R.layout.videos_list_item, viewGroup, false);
         return new VideosViewHolder(view);
     }
 
@@ -50,10 +54,10 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideosView
     }
 
     class VideosViewHolder extends RecyclerView.ViewHolder {
-//        @BindView(R.id.iv_movie)
-//        ImageView movieIV;
-//        @BindView(R.id.tv_movie_title)
-//        TextView movieTitleTV;
+        @BindView(R.id.ib_play)
+        ImageButton playIB;
+        @BindView(R.id.iv_video)
+        ImageView videoIV;
 
         VideosViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -61,13 +65,19 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideosView
         }
 
         void bind(Video video) {
-//            movieTitleTV.setText(movie.getTitle());
-//            Picasso.get()
-//                    .load(movie.getPosterUrl())
-//                    .placeholder(R.drawable.movie_placeholder)
-//                    .error(R.drawable.movie_placeholder)
-//                    .fit()
-//                    .into(movieIV);
+            playIB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    VideosViewHolder.this.onClick(v);
+                }
+            });
+
+            Picasso.get()
+                    .load(video.getImageUrl())
+                    .placeholder(R.drawable.movie_placeholder)
+                    .error(R.drawable.movie_placeholder)
+                    .fit()
+                    .into(videoIV);
         }
 
         @OnClick

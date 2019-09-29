@@ -18,8 +18,16 @@ import static com.example.popularmovies.utilities.JsonUtils.optString;
 public class VideoListDeserializer implements JsonDeserializer<ResponseList<Video>> {
 
     private static final String YOUTUBE = "youtube";
+    private static final String VIDEO_URL = "https://www.%s.com/watch?v=%s";
+    private static final String IMAGE_URL = "https://i.ytimg.com/vi/%s/%s.jpg";
+    private static final String MEDIUM_QUALITY = "mqdefault";
+    private static final String DEFAULT = "default";
 
-    VideoListDeserializer() {}
+    private static Boolean isTablet;
+
+    VideoListDeserializer(Boolean isTablet) {
+        VideoListDeserializer.isTablet = isTablet;
+    }
 
     @Override
     public ResponseList<Video> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -30,7 +38,7 @@ public class VideoListDeserializer implements JsonDeserializer<ResponseList<Vide
         for (int i = 0; i < results.size(); i++) {
             JsonObject result = results.get(i).getAsJsonObject();
             Video video = getVideo(result);
-            if (video.getUrl().contains(YOUTUBE)) {
+            if (video.getVideoUrl().contains(YOUTUBE)) {
                 videos.add(video);
             }
         }
@@ -43,13 +51,16 @@ public class VideoListDeserializer implements JsonDeserializer<ResponseList<Vide
         String key = optString(result.get("key"));
         String name = optString(result.get("name"));
         String site = optString(result.get("site"));
-        String type = optString(result.get("type"));
 
-        return new Video(id, name, type, getVideoUrl(site, key));
+        return new Video(id, name, key, getVideoUrl(site, key), getImageUrl(key));
+    }
+
+    private static String getImageUrl(String key) {
+        return String.format(IMAGE_URL, key, isTablet ? MEDIUM_QUALITY : DEFAULT);
     }
 
     private static String getVideoUrl(String site, String key) {
-        return String.format("https://www.%s.com/watch?v=%s", site.toLowerCase(), key);
+        return String.format(VIDEO_URL, site.toLowerCase(), key);
     }
 
 }

@@ -1,7 +1,10 @@
 package com.example.popularmovies;
 
 import android.arch.lifecycle.Observer;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -19,6 +22,7 @@ import android.widget.TextView;
 
 import com.example.popularmovies.adapter.OnMovieDetailsClickListener;
 import com.example.popularmovies.adapter.ReviewsAdapter;
+import com.example.popularmovies.adapter.VideosAdapter;
 import com.example.popularmovies.database.AppDatabase;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.model.ResponseList;
@@ -31,7 +35,6 @@ import com.example.popularmovies.viewmodel.DetailsViewModelFactory;
 import com.squareup.picasso.Picasso;
 
 import java.util.Date;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,15 +45,11 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
 
     @BindView(R.id.nested_scroll_view)
     NestedScrollView scrollView;
-    @BindView(R.id.pb_rv)
-    ProgressBar progressBar;
-    @BindView(R.id.tv_error_message)
-    TextView errorMessageTV;
-    @BindView(R.id.rv_reviews)
-    RecyclerView reviewsRV;
 
+    @BindView(R.id.movie_details_layout)
+    LinearLayout movieDetailsLayout;
     @BindView(R.id.favorite_movie)
-    ImageButton imageButton;
+    ImageButton favoriteButton;
     @BindView(R.id.vote_count_tv)
     TextView voteCountTV;
     @BindView(R.id.overview_tv)
@@ -62,13 +61,29 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
     @BindView(R.id.rating_tv)
     TextView ratingTV;
 
+
+    @BindView(R.id.rv_videos)
+    RecyclerView videosRV;
+    @BindView(R.id.rv_reviews)
+    RecyclerView reviewsRV;
+
+    @BindView(R.id.tv_error_message)
+    TextView errorMessageTV;
+    @BindView(R.id.tv_error_message_videos)
+    TextView videosErrorMessageTV;
+
+    @BindView(R.id.pb_videos)
+    ProgressBar videosPB;
+    @BindView(R.id.pb_reviews)
+    ProgressBar reviewsPB;
+
+    VideosAdapter videosAdapter;
     ReviewsAdapter reviewsAdapter;
+
     private boolean isLoading = false;
     private DetailsViewModel viewModel;
     private AlertDialog.Builder builder;
     private Snackbar snackBar;
-    @BindView(R.id.movie_details_layout)
-    LinearLayout movieDetailsLayout;
 
 
     @Override
@@ -82,8 +97,12 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         Movie movie = getIntent().getParcelableExtra(AppConstants.SELECTED_MOVIE);
         bindMovie(movie);
 
+        final LinearLayoutManager videosLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        videosAdapter = new VideosAdapter(this);
+        videosRV.setLayoutManager(videosLayoutManager);
+        videosRV.setAdapter(videosAdapter);
+
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        reviewsRV = findViewById(R.id.rv_reviews);
         reviewsAdapter = new ReviewsAdapter(this);
         reviewsRV.setLayoutManager(layoutManager);
         reviewsRV.setAdapter(reviewsAdapter);
@@ -93,7 +112,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (canLoadReviews(v, scrollY, oldScrollY)) {
                     if (RetrofitUtils.isOnline(getApplicationContext())) {
-                        showProgressBar();
+                        showProgressBar(reviewsPB);
                         viewModel.getReviews(viewModel.getCurrentPage() + 1);
                     } else {
                         checkInternetConnection();
@@ -113,30 +132,52 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         DetailsViewModelFactory viewModelFactory = new DetailsViewModelFactory(getApplicationContext(), movie.getId());
         viewModel = viewModelFactory.create(DetailsViewModel.class);
 
+        loadVideos();
+        loadReviews();
+    }
+
+    private void loadVideos() {
         if (RetrofitUtils.isOnline(getApplicationContext())) {
-            showProgressBar();
+            showProgressBar(videosPB);
+            viewModel.getVideos().observe(this, new Observer<ResponseList<Video>>() {
+                @Override
+                public void onChanged(@Nullable ResponseList<Video> videoResponseList) {
+                    hideProgressBar(videosPB);
+                    if (videoResponseList != null && !videoResponseList.getItems().isEmpty()) {
+                        hideErrorMessage(videosErrorMessageTV);
+                        videosAdapter.setVideos(videoResponseList.getItems());
+                    } else if (RetrofitUtils.isOnline(getApplicationContext())) {
+                        showErrorMessage(videosErrorMessageTV, R.string.no_videos);
+                    } else {
+                        checkInternetConnection();
+                    }
+                }
+            });
+        } else if (viewModel.getVideos().getValue() == null || viewModel.getVideos().getValue().getItems().isEmpty()){
+            showErrorMessage(videosErrorMessageTV, R.string.error_message);
+        }
+    }
+
+    private void loadReviews() {
+        if (RetrofitUtils.isOnline(getApplicationContext())) {
+            showProgressBar(reviewsPB);
             viewModel.getReviews(viewModel.getCurrentPage()).observe(this, new Observer<ResponseList<Review>>() {
                 @Override
                 public void onChanged(@Nullable ResponseList<Review> reviewResponseList) {
-                    hideProgressBar();
+                    hideProgressBar(reviewsPB);
                     if (reviewResponseList != null && !reviewResponseList.getItems().isEmpty()) {
-                        updateRecyclerView(reviewResponseList.getItems());
+                        hideErrorMessage(errorMessageTV);
+                        reviewsAdapter.setReviews(reviewResponseList.getItems());
                     } else if (viewModel.getCurrentPage() == 1 && RetrofitUtils.isOnline(getApplicationContext())) {
-                        showErrorMessage(R.string.no_reviews);
+                        showErrorMessage(errorMessageTV, R.string.no_reviews);
                     } else {
                         checkInternetConnection();
                     }
                 }
             });
         } else if (viewModel.getReviews().getValue() == null || viewModel.getReviews().getValue().getItems().isEmpty()){
-            showErrorMessage(R.string.error_message);
+            showErrorMessage(errorMessageTV, R.string.error_message);
         }
-
-    }
-
-    void updateRecyclerView(List<Review> reviews) {
-        hideErrorMessage();
-        reviewsAdapter.setReviews(reviews);
     }
 
     private void bindMovie(Movie movie) {
@@ -157,18 +198,18 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
             public void run() {
                 boolean isFavorite = AppDatabase.getInstance(getApplicationContext()).movieDao().isFavoriteMovie(movie.getId());
                 int drawableId = isFavorite ? android.R.drawable.btn_star_big_on : android.R.drawable.btn_star_big_off;
-                imageButton.setImageResource(drawableId);
-                imageButton.setTag(drawableId);
+                favoriteButton.setImageResource(drawableId);
+                favoriteButton.setTag(drawableId);
             }
         });
 
-        imageButton.setOnClickListener(new View.OnClickListener() {
+        favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        int drawableId = (int) imageButton.getTag();
+                        int drawableId = (int) favoriteButton.getTag();
                         if (drawableId == android.R.drawable.btn_star_big_off) {
                             drawableId = android.R.drawable.btn_star_big_on;
                             movie.setBookmarkDate(new Date());
@@ -181,8 +222,8 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                imageButton.setImageResource(finalDrawableId);
-                                imageButton.setTag(finalDrawableId);
+                                favoriteButton.setImageResource(finalDrawableId);
+                                favoriteButton.setTag(finalDrawableId);
                             }
                         });
                     }
@@ -211,12 +252,12 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
                 .into(posterIV);
     }
 
-    void showProgressBar() {
+    void showProgressBar(ProgressBar progressBar) {
         isLoading = true;
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    private void hideProgressBar() {
+    private void hideProgressBar(ProgressBar progressBar) {
         isLoading = false;
         progressBar.setVisibility(View.INVISIBLE);
     }
@@ -228,21 +269,27 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         snackBar.show();
     }
 
-    private void showErrorMessage(int message) {
+    private void showErrorMessage(TextView textView, int message) {
         isLoading = false;
         reviewsRV.setVisibility(View.INVISIBLE);
-        errorMessageTV.setText(message);
+        textView.setText(message);
         errorMessageTV.setVisibility(View.VISIBLE);
     }
 
-    private void hideErrorMessage() {
-        errorMessageTV.setVisibility(View.INVISIBLE);
+    private void hideErrorMessage(TextView textView) {
+        textView.setVisibility(View.INVISIBLE);
         reviewsRV.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onVideoClick(Video video) {
-
+        try {
+            Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + video.getKey()));
+            startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(video.getVideoUrl()));
+            startActivity(webIntent);
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.popularmovies.viewmodel;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.support.annotation.NonNull;
 import com.example.popularmovies.AppConstants;
 import com.example.popularmovies.model.ResponseList;
 import com.example.popularmovies.model.Review;
+import com.example.popularmovies.model.Video;
 import com.example.popularmovies.service.MovieApiService;
 import com.example.popularmovies.utilities.RetrofitUtils;
 
@@ -18,6 +20,7 @@ import retrofit2.Response;
 public class DetailsViewModel extends ViewModel {
 
     private final Long id;
+    private MutableLiveData<ResponseList<Video>> videos = new MutableLiveData<>();
     private MutableLiveData<ResponseList<Review>> reviews = new MutableLiveData<>();
 
     private Integer currentPage = 1;
@@ -28,6 +31,23 @@ public class DetailsViewModel extends ViewModel {
     DetailsViewModel(Context context, Long id) {
         this.id = id;
         this.movieService = RetrofitUtils.getMovieService(context);
+    }
+
+    public LiveData<ResponseList<Video>> getVideos() {
+        if (videos.getValue() == null) {
+            Call<ResponseList<Video>> videosCall = movieService.getVideos(id, AppConstants.API_KEY);
+            videosCall.enqueue(new Callback<ResponseList<Video>>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseList<Video>> call, @NonNull Response<ResponseList<Video>> response) {
+                    videos.setValue(response.body());
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseList<Video>> call, @NonNull Throwable t) {
+                }
+            });
+        }
+        return videos;
     }
 
     public MutableLiveData<ResponseList<Review>> getReviews(Integer page) {

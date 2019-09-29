@@ -1,24 +1,25 @@
 <resources>
-    <string name="app_name">Popular Movies</string>
-    <string name="error_message">Error Occurred. Please Retry Again.</string>
-    <string name="movie_poster">Movie Poster</string>
-    <string name="dummy_movie_title">Movie Title</string>
-    <string name="most_popular">Most Popular</string>
-    <string name="top_rated">Top Rated</string>
-    <string name="sort">Sort</string>
-    <string name="dummy_movie_rating">7.5</string>
-    <string name="original_title">Original Title</string>
-    <string name="overview">Overview</string>
-    <string name="release_date">Release Date</string>
-    <string name="vote">Vote</string>
-    <string name="favorite_movie_icon">Favorite Movie</string>
-    <string name="favorites">Favorites</string>
-    <string name="no_favorites">No favorite movies were found.</string>
-    <string name="dummy_text">Dummy Text</string>
-    <string name="videos">Videos</string>
-    <string name="dummy_author">barf burglar</string>
-    <string name="reviews">Reviews</string>
-    <string name="no_reviews">This movie does not have any reviews yet.</string>
-    <string name="dummy_review">Just like the Matrix series, the John Wick series is the child of; interesting concepts, mediocre direction, bad writing, bad dialogue, fine (OK) acting and good to great fight choreography…   John Wick 3 outstays its welcome and becomes tedious with all the boring twists and uninspired resolutions.  you\'ll watch it once, forget it ever existed and then never watch it again</string>
-    <string name="expand_review">Expand Review</string>
+    <string name="app_name" translatable="false">Popular Movies</string>
+    <string name="error_message" translatable="false">Error Occurred. Please Retry Again.</string>
+    <string name="movie_poster" translatable="false">Movie Poster</string>
+    <string name="dummy_movie_title" translatable="false">Movie Title</string>
+    <string name="most_popular" translatable="false">Most Popular</string>
+    <string name="top_rated" translatable="false">Top Rated</string>
+    <string name="sort" translatable="false">Sort</string>
+    <string name="dummy_movie_rating" translatable="false">7.5</string>
+    <string name="original_title" translatable="false">Original Title</string>
+    <string name="overview" translatable="false">Overview</string>
+    <string name="release_date" translatable="false">Release Date</string>
+    <string name="vote" translatable="false">Vote</string>
+    <string name="favorite_movie_icon" translatable="false">Favorite Movie</string>
+    <string name="favorites" translatable="false">Favorites</string>
+    <string name="no_favorites" translatable="false">No favorite movies were found.</string>
+    <string name="dummy_text" translatable="false">Dummy Text</string>
+    <string name="videos" translatable="false">Videos</string>
+    <string name="dummy_author" translatable="false">barf burglar</string>
+    <string name="reviews" translatable="false">Reviews</string>
+    <string name="no_reviews" translatable="false">This movie does not have any reviews yet.</string>
+    <string name="no_videos" translatable="false">This movie does not have any videos yet.</string>
+    <string name="dummy_review" translatable="false">Just like the Matrix series, the John Wick series is the child of; interesting concepts, mediocre direction, bad writing, bad dialogue, fine (OK) acting and good to great fight choreography…   John Wick 3 outstays its welcome and becomes tedious with all the boring twists and uninspired resolutions.  you\'ll watch it once, forget it ever existed and then never watch it again</string>
+    <string name="expand_review" translatable="false">Expand Review</string>
 </resources>

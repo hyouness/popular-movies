@@ -18,4 +18,6 @@
     <dimen name="review_item_height">125dp</dimen>
     <dimen name="corner_radius">10dip</dimen>
     <dimen name="card_elevation">6dp</dimen>
+    <dimen name="video_height">105dp</dimen>
+    <dimen name="video_width">140dp</dimen>
 </resources>

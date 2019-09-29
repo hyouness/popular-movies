@@ -3,17 +3,19 @@ package com.example.popularmovies.model;
 public class Video {
     private String id;
     private String name;
-    private String type;
-    private String url;
+    private String key;
+    private String videoUrl;
+    private String imageUrl;
 
     public Video() {
     }
 
-    public Video(String id, String name, String type, String url) {
+    public Video(String id, String name, String key, String videoUrl, String imageUrl) {
         this.id = id;
         this.name = name;
-        this.type = type;
-        this.url = url;
+        this.key = key;
+        this.videoUrl = videoUrl;
+        this.imageUrl = imageUrl;
     }
 
     public String getId() {
@@ -32,19 +34,27 @@ public class Video {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public String getKey() {
+        return key;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setKey(String key) {
+        this.key = key;
     }
 
-    public String getUrl() {
-        return url;
+    public String getVideoUrl() {
+        return videoUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
