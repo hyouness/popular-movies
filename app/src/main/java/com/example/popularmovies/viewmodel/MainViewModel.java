@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 import com.example.popularmovies.AppConstants;
 import com.example.popularmovies.database.AppDatabase;
 import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.model.MovieList;
+import com.example.popularmovies.model.ResponseList;
 import com.example.popularmovies.service.MovieApiService;
 import com.example.popularmovies.utilities.RetrofitUtils;
 
@@ -49,24 +49,24 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private void loadMovies() {
-        Call<MovieList> moviesCall = movieService.getMovies(currentSearchType, currentPage, AppConstants.API_KEY);
-        moviesCall.enqueue(new Callback<MovieList>() {
+        Call<ResponseList<Movie>> moviesCall = movieService.getMovies(currentSearchType, currentPage, AppConstants.API_KEY);
+        moviesCall.enqueue(new Callback<ResponseList<Movie>>() {
             @Override
-            public void onResponse(@NonNull Call<MovieList> call, @NonNull Response<MovieList> response) {
+            public void onResponse(@NonNull Call<ResponseList<Movie>> call, @NonNull Response<ResponseList<Movie>> response) {
                 List<Movie> currentMovies = movies.getValue() != null ? movies.getValue() : new ArrayList<Movie>();
-                MovieList body = response.body();
+                ResponseList<Movie> body = response.body();
                 if (body != null) {
                     if (currentPage == 1) {
-                        currentMovies = body.getMovies();
+                        currentMovies = body.getItems();
                     } else {
-                        currentMovies.addAll(body.getMovies());
+                        currentMovies.addAll(body.getItems());
                     }
                 }
                 movies.setValue(currentMovies);
             }
 
             @Override
-            public void onFailure(@NonNull Call<MovieList> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ResponseList<Movie>> call, @NonNull Throwable t) {
                 movies.setValue(movies.getValue());
             }
         });

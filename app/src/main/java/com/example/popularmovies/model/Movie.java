@@ -82,6 +82,8 @@ public class Movie implements Parcelable {
         this.overview = overview;
     }
 
+    // Credit: idea behind formatting the rating in % form next to a heart with number of votes
+    // was inspired by: https://is1-ssl.mzstatic.com/image/thumb/Purple49/v4/c0/6b/35/c06b358f-33b2-b1d5-530c-c3c36babda85/pr_source.png/696x696bb.png
     public String getRating() {
         return rating;
     }

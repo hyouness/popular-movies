@@ -5,9 +5,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.example.popularmovies.AppConstants;
-import com.example.popularmovies.model.MovieList;
+import com.example.popularmovies.R;
+import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.model.ResponseList;
+import com.example.popularmovies.model.Review;
+import com.example.popularmovies.model.Video;
 import com.example.popularmovies.service.MovieApiService;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.yydcdut.markdown.MarkdownProcessor;
+import com.yydcdut.markdown.syntax.text.TextFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +36,9 @@ final public class RetrofitUtils {
                     .readTimeout(30, TimeUnit.SECONDS).build();
 
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(MovieList.class, new MovieListDeserializer(context));
+            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Movie>>(){}.getType(), new MovieListDeserializer(context.getResources().getBoolean(R.bool.isTablet)));
+            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Video>>(){}.getType(), new VideoListDeserializer());
+            gsonBuilder.registerTypeAdapter(new TypeToken<ResponseList<Review>>(){}.getType(), new ReviewListDeserializer(getMarkdownProcessor(context)));
 
             retrofit = new Retrofit.Builder()
                     .baseUrl(AppConstants.BASE_URL)
@@ -39,6 +48,12 @@ final public class RetrofitUtils {
         }
 
         return retrofit;
+    }
+
+    private static MarkdownProcessor getMarkdownProcessor(Context context) {
+        MarkdownProcessor markdownProcessor = new MarkdownProcessor(context);
+        markdownProcessor.factory(TextFactory.create());
+        return markdownProcessor;
     }
 
     public static boolean isOnline(Context context) {

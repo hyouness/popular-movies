@@ -1,7 +1,7 @@
-package com.example.popularmovies;
+package com.example.popularmovies.adapter;
 
 import com.example.popularmovies.model.Movie;
 
-interface OnMovieItemClickListener {
+public interface OnMovieClickListener {
     void onMovieClick(Movie movie);
 }

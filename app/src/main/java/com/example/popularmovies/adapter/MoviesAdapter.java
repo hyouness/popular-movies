@@ -1,4 +1,4 @@
-package com.example.popularmovies;
+package com.example.popularmovies.adapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.popularmovies.R;
 import com.example.popularmovies.model.Movie;
 import com.squareup.picasso.Picasso;
 
@@ -18,26 +19,26 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdapter.PopularMoviesViewHolder> {
+public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder> {
 
     private List<Movie> movies = new ArrayList<>();
 
-    private final OnMovieItemClickListener onMovieItemClickListener;
+    private final OnMovieClickListener onMovieItemClickListener;
 
-    PopularMoviesAdapter(OnMovieItemClickListener onMovieItemClickListener) {
+    public MoviesAdapter(OnMovieClickListener onMovieItemClickListener) {
         this.onMovieItemClickListener = onMovieItemClickListener;
     }
 
     @NonNull
     @Override
-    public PopularMoviesViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public MoviesViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
         View view = inflater.inflate(R.layout.movies_list_item, viewGroup, false);
-        return new PopularMoviesViewHolder(view);
+        return new MoviesViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull PopularMoviesViewHolder viewHolder, int i) {
+    public void onBindViewHolder(@NonNull MoviesViewHolder viewHolder, int i) {
         Movie movie = movies.get(i);
         viewHolder.bind(movie);
     }
@@ -47,18 +48,18 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         return movies.size();
     }
 
-    void setMovies(List<Movie> movies) {
+    public void setMovies(List<Movie> movies) {
         this.movies = movies;
         notifyDataSetChanged();
     }
 
-    class PopularMoviesViewHolder extends RecyclerView.ViewHolder {
+    class MoviesViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.iv_movie)
         ImageView movieIV;
         @BindView(R.id.tv_movie_title)
         TextView movieTitleTV;
 
-        PopularMoviesViewHolder(@NonNull View itemView) {
+        MoviesViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

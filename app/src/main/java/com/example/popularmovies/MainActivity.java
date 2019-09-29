@@ -16,6 +16,8 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.popularmovies.adapter.MoviesAdapter;
+import com.example.popularmovies.adapter.OnMovieClickListener;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.utilities.RetrofitUtils;
 import com.example.popularmovies.viewmodel.MainViewModel;
@@ -25,7 +27,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements OnMovieItemClickListener {
+public class MainActivity extends AppCompatActivity implements OnMovieClickListener {
 
     private Boolean isLoading = false;
 
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
     @BindView(R.id.frameLayout)
     FrameLayout frameLayout;
 
-    private PopularMoviesAdapter adapter;
+    private MoviesAdapter adapter;
     private Snackbar snackBar;
     private MainViewModel viewModel;
     private Observer<List<Movie>> favoriteMoviesObserver;
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        adapter = new PopularMoviesAdapter(this);
+        adapter = new MoviesAdapter(this);
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
         GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), getSpanCount());
@@ -61,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
             @Override
             protected void loadMoreItems() {
                 if (!isLoading && !viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
-                    isLoading = true;
                     loadMovies(viewModel.getCurrentSearchType(), viewModel.getCurrentPage() + 1);
                 }
             }
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieItemClickL
         } else {
             hideErrorMessage();
             if (viewModel.getCurrentPage() == 1) {
+                recyclerView.scrollToPosition(0);
                 adapter.setMovies(movies);
             } else {
                 isLoading = false;

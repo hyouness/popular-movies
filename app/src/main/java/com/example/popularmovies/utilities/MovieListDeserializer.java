@@ -1,16 +1,12 @@
 package com.example.popularmovies.utilities;
 
-import android.content.Context;
-
 import com.example.popularmovies.AppConstants;
-import com.example.popularmovies.R;
 import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.model.MovieList;
+import com.example.popularmovies.model.ResponseList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
@@ -20,39 +16,43 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieListDeserializer implements JsonDeserializer<MovieList> {
+import static com.example.popularmovies.utilities.JsonUtils.optDouble;
+import static com.example.popularmovies.utilities.JsonUtils.optLong;
+import static com.example.popularmovies.utilities.JsonUtils.optString;
+
+public class MovieListDeserializer implements JsonDeserializer<ResponseList<Movie>> {
 
     private static final String W185 = "w185";
     private static final String W500 = "w500";
     private static final String W780 = "w780";
 
-    private Context context;
+    private static Boolean isTablet;
 
-    MovieListDeserializer(Context context) {
-        this.context = context;
+    MovieListDeserializer(Boolean isTablet) {
+        MovieListDeserializer.isTablet = isTablet;
     }
 
     @Override
-    public MovieList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public ResponseList<Movie> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         List<Movie> movies = new ArrayList<>();
 
         final JsonObject moviesObject = json.getAsJsonObject();
 
-        long page = moviesObject.get("page").getAsLong();
-        long totalPages = moviesObject.get("total_pages").getAsLong();
-        long totalResults = moviesObject.get("total_results").getAsLong();
+        Integer page = moviesObject.get("page").getAsInt();
+        Integer totalPages = moviesObject.get("total_pages").getAsInt();
+        Integer totalResults = moviesObject.get("total_results").getAsInt();
 
         JsonArray results = moviesObject.getAsJsonArray("results");
         for (int i = 0; i < results.size(); i++) {
             JsonObject result = results.get(i).getAsJsonObject();
-            Movie movie = getMovie(this.context, result);
+            Movie movie = getMovie(result);
             movies.add(movie);
         }
 
-        return new MovieList(page, totalResults, totalPages, movies);
+        return new ResponseList<>(page, totalResults, totalPages, movies);
     }
 
-    private static Movie getMovie(Context context, JsonObject result) {
+    private static Movie getMovie(JsonObject result) {
         long id = optLong(result.get("id"));
         String title = optString(result.get("title"));
         String originalTitle = optString(result.get("original_title"));
@@ -63,34 +63,17 @@ public class MovieListDeserializer implements JsonDeserializer<MovieList> {
         String releaseDate = optString(result.get("release_date"));
         String voteCount = getVoteCount(optLong(result.get("vote_count")));
 
-        return Movie.newMovie(id, title, getImageUrl(posterPath, false, context))
+        return Movie.newMovie(id, title, getImageUrl(posterPath, false))
                 .originalTitle(originalTitle)
                 .overview(overview.isEmpty() ? AppConstants.MISSING_OVERVIEW : overview)
-                .backdropImageUrl(getImageUrl(backdropPath, true, context))
+                .backdropImageUrl(getImageUrl(backdropPath, true))
                 .rating(rating)
                 .releaseDate(DateUtils.formatDate(releaseDate))
                 .voteCount(voteCount)
                 .build();
     }
 
-    private static String optString(JsonElement jsonElement) {
-        return isJsonNotNull(jsonElement) ? jsonElement.getAsString() : "";
-    }
-
-    private static Long optLong(JsonElement jsonElement) {
-        return isJsonNotNull(jsonElement) ? jsonElement.getAsLong() : 0L;
-    }
-
-    private static Double optDouble(JsonElement jsonElement) {
-        return isJsonNotNull(jsonElement) ? jsonElement.getAsDouble() : Double.NaN;
-    }
-
-    private static boolean isJsonNotNull(JsonElement jsonElement) {
-        return !(jsonElement instanceof JsonNull);
-    }
-
-    private static String getImageUrl(String path, Boolean isBackDrop, Context context) {
-        boolean isTablet = context.getResources().getBoolean(R.bool.isTablet);
+    private static String getImageUrl(String path, Boolean isBackDrop) {
         String imageSize = !isTablet ? isBackDrop ? W500 : W185 : W780;
         return AppConstants.IMAGE_BASE_URL + imageSize + path;
     }

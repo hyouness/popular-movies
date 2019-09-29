@@ -5,12 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".DetailsActivity"
+    android:id="@+id/movie_details_layout"
+    android:baselineAligned="false"
     android:weightSum="10">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:orientation="vertical"
         android:layout_height="0dp"
+        android:orientation="vertical"
         android:layout_weight="4">
         <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -67,7 +69,7 @@
                     android:textStyle="bold"
                     android:layout_gravity="center_vertical"
                     android:textColor="@android:color/white"
-                    android:text="@string/dummy_movie_rating"
+                    tools:text="@string/dummy_movie_rating"
                     android:padding="8dp"
                     android:paddingEnd="8dp"
                     android:paddingStart="0dp"
@@ -79,9 +81,9 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:textColor="@android:color/white"
-                    android:text="@string/dummy_movie_rating"
+                    tools:text="@string/dummy_movie_rating"
                     android:padding="8dp"
-                    android:paddingEnd="3dp"
+                    android:paddingEnd="10dp"
                     android:paddingStart="5dp"
                     android:textSize="@dimen/rating_text_size"/>
 
@@ -90,10 +92,14 @@
     </LinearLayout>
 
 
-    <ScrollView
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:fillViewport="true"
+        android:scrollbars="vertical"
+        android:scrollbarThumbVertical="@color/scrollbarColor"
+        android:scrollbarFadeDuration="2000"
         android:layout_weight="6">
         <LinearLayout
             android:orientation="vertical"
@@ -120,10 +126,10 @@
                     android:id="@+id/original_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    tools:text="@string/dummy_text"
                     android:textSize="@dimen/details_text_size"
                     android:layout_marginStart="@dimen/inline_horizontal_margin" />
             </LinearLayout>
-
 
             <LinearLayout
                 android:id="@+id/release_date_ll"
@@ -144,6 +150,7 @@
                     android:id="@+id/release_date_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    tools:text="@string/dummy_text"
                     android:textSize="@dimen/details_text_size"
                     android:layout_marginStart="@dimen/inline_horizontal_margin" />
             </LinearLayout>
@@ -161,13 +168,24 @@
                 android:id="@+id/overview_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                tools:text="@string/dummy_text"
                 android:textSize="@dimen/details_text_size"
                 android:layout_marginTop="@dimen/headline_bottom_margin"
                 android:layout_marginBottom="10dp"
                 android:layout_marginStart="@dimen/inline_horizontal_margin"
                 android:layout_marginEnd="@dimen/inline_horizontal_margin" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reviews"
+                android:textStyle="bold"
+                android:textSize="@dimen/details_text_size"
+                android:layout_marginStart="@dimen/inline_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+
+            <include layout="@layout/reviews_list"/>
         </LinearLayout>
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 
 </LinearLayout>
