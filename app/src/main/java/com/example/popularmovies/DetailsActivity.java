@@ -1,6 +1,7 @@
 package com.example.popularmovies;
 
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -112,6 +113,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (canLoadReviews(v, scrollY, oldScrollY)) {
                     if (RetrofitUtils.isOnline(getApplicationContext())) {
+                        isLoading = true;
                         showProgressBar(reviewsPB);
                         viewModel.getReviews(viewModel.getCurrentPage() + 1);
                     } else {
@@ -130,53 +132,61 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         });
 
         DetailsViewModelFactory viewModelFactory = new DetailsViewModelFactory(getApplicationContext(), movie.getId());
-        viewModel = viewModelFactory.create(DetailsViewModel.class);
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(DetailsViewModel.class);
 
         loadVideos();
         loadReviews();
     }
 
     private void loadVideos() {
-        if (RetrofitUtils.isOnline(getApplicationContext())) {
+        if (RetrofitUtils.isOnline(getApplicationContext()) || viewModel.getVideos().getValue() != null) {
             showProgressBar(videosPB);
             viewModel.getVideos().observe(this, new Observer<ResponseList<Video>>() {
                 @Override
                 public void onChanged(@Nullable ResponseList<Video> videoResponseList) {
                     hideProgressBar(videosPB);
                     if (videoResponseList != null && !videoResponseList.getItems().isEmpty()) {
-                        hideErrorMessage(videosErrorMessageTV);
+                        hideErrorMessage(videosErrorMessageTV, videosRV);
                         videosAdapter.setVideos(videoResponseList.getItems());
                     } else if (RetrofitUtils.isOnline(getApplicationContext())) {
-                        showErrorMessage(videosErrorMessageTV, R.string.no_videos);
+                        showErrorMessage(videosErrorMessageTV, R.string.no_videos, videosRV);
                     } else {
                         checkInternetConnection();
                     }
                 }
             });
-        } else if (viewModel.getVideos().getValue() == null || viewModel.getVideos().getValue().getItems().isEmpty()){
-            showErrorMessage(videosErrorMessageTV, R.string.error_message);
+            if (viewModel.getVideos().getValue() != null) {
+                viewModel.getVideos().setValue(viewModel.getVideos().getValue());
+            }
+        } else {
+            showErrorMessage(videosErrorMessageTV, R.string.error_message, videosRV);
         }
     }
 
     private void loadReviews() {
-        if (RetrofitUtils.isOnline(getApplicationContext())) {
+        if (RetrofitUtils.isOnline(getApplicationContext()) || viewModel.getReviews().getValue() != null) {
+            isLoading = true;
             showProgressBar(reviewsPB);
             viewModel.getReviews(viewModel.getCurrentPage()).observe(this, new Observer<ResponseList<Review>>() {
                 @Override
                 public void onChanged(@Nullable ResponseList<Review> reviewResponseList) {
+                    isLoading = false;
                     hideProgressBar(reviewsPB);
                     if (reviewResponseList != null && !reviewResponseList.getItems().isEmpty()) {
-                        hideErrorMessage(errorMessageTV);
+                        hideErrorMessage(errorMessageTV, reviewsRV);
                         reviewsAdapter.setReviews(reviewResponseList.getItems());
                     } else if (viewModel.getCurrentPage() == 1 && RetrofitUtils.isOnline(getApplicationContext())) {
-                        showErrorMessage(errorMessageTV, R.string.no_reviews);
+                        showErrorMessage(errorMessageTV, R.string.no_reviews, reviewsRV);
                     } else {
                         checkInternetConnection();
                     }
                 }
             });
+            if (viewModel.getReviews().getValue() != null) {
+                viewModel.getReviews().setValue(viewModel.getReviews().getValue());
+            }
         } else if (viewModel.getReviews().getValue() == null || viewModel.getReviews().getValue().getItems().isEmpty()){
-            showErrorMessage(errorMessageTV, R.string.error_message);
+            showErrorMessage(errorMessageTV, R.string.error_message, reviewsRV);
         }
     }
 
@@ -253,12 +263,10 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
     }
 
     void showProgressBar(ProgressBar progressBar) {
-        isLoading = true;
         progressBar.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar(ProgressBar progressBar) {
-        isLoading = false;
         progressBar.setVisibility(View.INVISIBLE);
     }
 
@@ -269,16 +277,15 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         snackBar.show();
     }
 
-    private void showErrorMessage(TextView textView, int message) {
-        isLoading = false;
-        reviewsRV.setVisibility(View.INVISIBLE);
+    private void showErrorMessage(TextView textView, int message, RecyclerView recyclerView) {
+        recyclerView.setVisibility(View.INVISIBLE);
         textView.setText(message);
-        errorMessageTV.setVisibility(View.VISIBLE);
+        textView.setVisibility(View.VISIBLE);
     }
 
-    private void hideErrorMessage(TextView textView) {
+    private void hideErrorMessage(TextView textView, RecyclerView recyclerView) {
         textView.setVisibility(View.INVISIBLE);
-        reviewsRV.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
     }
 
     @Override

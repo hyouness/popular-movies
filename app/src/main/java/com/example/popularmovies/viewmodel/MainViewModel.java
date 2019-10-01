@@ -39,29 +39,29 @@ public class MainViewModel extends AndroidViewModel {
         favoriteMovies = appDatabase.movieDao().loadFavoriteMovies();
     }
 
-    public MutableLiveData<List<Movie>> getMovies(Integer page, String searchType) {
+    public MutableLiveData<List<Movie>> getMovies(String searchType, Integer page) {
         if (movies.getValue() == null || !currentSearchType.equals(searchType) || !currentPage.equals(page)) {
-            currentPage = page;
-            currentSearchType = searchType;
-            loadMovies();
+            loadMovies(searchType, page);
         }
         return movies;
     }
 
-    private void loadMovies() {
-        Call<ResponseList<Movie>> moviesCall = movieService.getMovies(currentSearchType, currentPage, AppConstants.API_KEY);
+    private void loadMovies(final String searchType, final Integer page) {
+        Call<ResponseList<Movie>> moviesCall = movieService.getMovies(searchType, page, AppConstants.API_KEY);
         moviesCall.enqueue(new Callback<ResponseList<Movie>>() {
             @Override
             public void onResponse(@NonNull Call<ResponseList<Movie>> call, @NonNull Response<ResponseList<Movie>> response) {
                 List<Movie> currentMovies = movies.getValue() != null ? movies.getValue() : new ArrayList<Movie>();
                 ResponseList<Movie> body = response.body();
                 if (body != null) {
-                    if (currentPage == 1) {
+                    if (page == 1) {
                         currentMovies = body.getItems();
                     } else {
                         currentMovies.addAll(body.getItems());
                     }
                 }
+                currentPage = page;
+                currentSearchType = searchType;
                 movies.setValue(currentMovies);
             }
 

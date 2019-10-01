@@ -63,7 +63,11 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
             @Override
             protected void loadMoreItems() {
                 if (!isLoading && !viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
-                    loadMovies(viewModel.getCurrentSearchType(), viewModel.getCurrentPage() + 1);
+                    if (!RetrofitUtils.isOnline(getApplicationContext())) {
+                        checkInternetConnection();
+                    } else {
+                        queryMoviesService(viewModel.getCurrentSearchType(), viewModel.getCurrentPage() + 1);
+                    }
                 }
             }
 
@@ -74,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         if (viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
             queryMoviesDatabase();
         } else {
-            if (RetrofitUtils.isOnline(getApplicationContext())) {
+            if (RetrofitUtils.isOnline(getApplicationContext()) || viewModel.getMovies().getValue() != null) {
                 queryMoviesService(viewModel.getCurrentSearchType(), viewModel.getCurrentPage());
             } else if (viewModel.getMovies().getValue() == null || viewModel.getMovies().getValue().isEmpty()){
                 showErrorMessage(R.string.error_message);
@@ -83,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
     }
 
     private void queryMoviesDatabase() {
-        setTitle(getTitle(MainViewModel.FAVORITES));
         showProgressBar();
         if (!viewModel.getFavoriteMovies().hasObservers()) {
             favoriteMoviesObserver = new Observer<List<Movie>>() {
@@ -105,16 +108,39 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         }
     }
 
+    private void queryMoviesService(String searchType, final Integer page) {
+        hideErrorMessage();
+        showProgressBar();
+        if (!viewModel.getMovies().hasObservers()) {
+            viewModel.getMovies(searchType, page).observe(this, new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(@Nullable List<Movie> movies) {
+                    hideProgressBar();
+                    if (movies != null && !movies.isEmpty()) {
+                        updateRecyclerView(movies);
+                    } else if (viewModel.getCurrentPage() == 1) {
+                        showErrorMessage(R.string.error_message);
+                    } else if (!RetrofitUtils.isOnline(getApplicationContext())) {
+                        checkInternetConnection();
+                    }
+                    isLoading = false;
+                }
+            });
+        } else {
+            viewModel.getMovies(searchType, page);
+        }
+    }
+
     void updateRecyclerView(List<Movie> movies) {
         if (movies.isEmpty() && viewModel.getCurrentPage() == 1) {
             showErrorMessage(R.string.error_message);
         } else {
-            hideErrorMessage();
-            if (viewModel.getCurrentPage() == 1) {
+            recyclerView.setVisibility(View.VISIBLE);
+            setTitle(getTitle(viewModel.getCurrentSearchType()));
+            if (viewModel.getCurrentPage() == 1 || viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
                 recyclerView.scrollToPosition(0);
                 adapter.setMovies(movies);
             } else {
-                isLoading = false;
                 adapter.setMovies(movies);
             }
         }
@@ -137,20 +163,6 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         return spanCount;
     }
 
-    private void loadMovies(String searchType, Integer page) {
-        isLoading = true;
-        boolean isOnline = RetrofitUtils.isOnline(getApplicationContext());
-        if (isOnline) {
-            hideErrorMessage();
-            setTitle(getTitle(searchType));
-            recyclerView.setVisibility(page == 1 ? View.INVISIBLE : View.VISIBLE);
-            queryMoviesService(searchType, page);
-        } else {
-            isLoading = false;
-            checkInternetConnection();
-        }
-    }
-
     private static String getTitle(String searchType) {
         if (searchType.equals(MainViewModel.POPULAR)) return "Popular Movies";
         else if (searchType.equals(MainViewModel.TOP_RATED)) return "Rated Movies";
@@ -164,27 +176,8 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         snackBar.show();
     }
 
-    private void queryMoviesService(String searchType, Integer page) {
-        showProgressBar();
-        if (!viewModel.getMovies().hasObservers()) {
-            viewModel.getMovies(page, searchType).observe(this, new Observer<List<Movie>>() {
-                @Override
-                public void onChanged(@Nullable List<Movie> movies) {
-                    hideProgressBar();
-                    if (movies != null && !movies.isEmpty()) {
-                        updateRecyclerView(movies);
-                    } else if (!RetrofitUtils.isOnline(getApplicationContext())) {
-                        checkInternetConnection();
-                    }
-                    isLoading = false;
-                }
-            });
-        } else {
-            viewModel.getMovies(page, searchType);
-        }
-    }
-
     void showProgressBar() {
+        isLoading = true;
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -232,11 +225,19 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
     }
 
     private void loadTopRatedMovies() {
-        loadMovies(MainViewModel.TOP_RATED, 1);
+        if (!RetrofitUtils.isOnline(getApplicationContext())) {
+            checkInternetConnection();
+        } else {
+            queryMoviesService(MainViewModel.TOP_RATED, 1);
+        }
     }
 
     private void loadMostPopularMovies() {
-        loadMovies(MainViewModel.POPULAR, 1);
+        if (!RetrofitUtils.isOnline(getApplicationContext())) {
+            checkInternetConnection();
+        } else {
+            queryMoviesService(MainViewModel.POPULAR, 1);
+        }
     }
 
     @Override

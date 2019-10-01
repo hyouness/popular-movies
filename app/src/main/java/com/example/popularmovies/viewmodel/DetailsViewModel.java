@@ -1,6 +1,5 @@
 package com.example.popularmovies.viewmodel;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
@@ -33,7 +32,7 @@ public class DetailsViewModel extends ViewModel {
         this.movieService = RetrofitUtils.getMovieService(context);
     }
 
-    public LiveData<ResponseList<Video>> getVideos() {
+    public MutableLiveData<ResponseList<Video>> getVideos() {
         if (videos.getValue() == null) {
             Call<ResponseList<Video>> videosCall = movieService.getVideos(id, AppConstants.API_KEY);
             videosCall.enqueue(new Callback<ResponseList<Video>>() {
@@ -44,6 +43,7 @@ public class DetailsViewModel extends ViewModel {
 
                 @Override
                 public void onFailure(@NonNull Call<ResponseList<Video>> call, @NonNull Throwable t) {
+                    videos.setValue(videos.getValue());
                 }
             });
         }
