@@ -198,8 +198,8 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         originalTitleTV.setText(movie.getOriginalTitle());
         ratingTV.setText(String.valueOf(movie.getRating()));
         initFavoriteButton(movie);
-        populatePosterView(movie.getPosterUrl());
-        populateBackdropView(movie.getBackdropImageUrl());
+        populateImageView(movie.getPosterUrl(), R.id.iv_movie_poster);
+        populateImageView(movie.getBackdropImageUrl(), R.id.iv_backdrop_image);
     }
 
     private void initFavoriteButton(final Movie movie) {
@@ -242,24 +242,13 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
         });
     }
 
-    private void populateBackdropView(String backdropUrl) {
-        ImageView backdropIV = findViewById(R.id.iv_backdrop_image);
-        backdropIV.setAlpha(0.8f);
+    private void populateImageView(String imageUrl, int id) {
+        ImageView imageView = findViewById(id);
         Picasso.get()
-                .load(backdropUrl)
+                .load(imageUrl)
                 .placeholder(R.drawable.movie_placeholder)
                 .error(R.drawable.movie_placeholder)
-                .into(backdropIV);
-    }
-
-    private void populatePosterView(String posterUrl) {
-        ImageView posterIV = findViewById(R.id.iv_movie_poster);
-        Picasso.get()
-                .load(posterUrl)
-                .placeholder(R.drawable.movie_placeholder)
-                .error(R.drawable.movie_placeholder)
-                .fit()
-                .into(posterIV);
+                .into(imageView);
     }
 
     void showProgressBar(ProgressBar progressBar) {

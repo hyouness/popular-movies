@@ -63,11 +63,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
             @Override
             protected void loadMoreItems() {
                 if (!isLoading && !viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
-                    if (!RetrofitUtils.isOnline(getApplicationContext())) {
-                        checkInternetConnection();
-                    } else {
-                        queryMoviesService(viewModel.getCurrentSearchType(), viewModel.getCurrentPage() + 1);
-                    }
+                    loadNewMovies(viewModel.getCurrentSearchType(), viewModel.getCurrentPage() + 1);
                 }
             }
 
@@ -87,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
     }
 
     private void queryMoviesDatabase() {
+        hideErrorMessage();
         showProgressBar();
         if (!viewModel.getFavoriteMovies().hasObservers()) {
             favoriteMoviesObserver = new Observer<List<Movie>>() {
@@ -94,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
                 public void onChanged(@Nullable List<Movie> movies) {
                     if (viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
                         hideProgressBar();
+                        setTitle(getTitle(viewModel.getCurrentSearchType()));
                         if (movies != null && !movies.isEmpty()) {
                             updateRecyclerView(movies);
                         } else {
@@ -132,18 +130,12 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
     }
 
     void updateRecyclerView(List<Movie> movies) {
-        if (movies.isEmpty() && viewModel.getCurrentPage() == 1) {
-            showErrorMessage(R.string.error_message);
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            setTitle(getTitle(viewModel.getCurrentSearchType()));
-            if (viewModel.getCurrentPage() == 1 || viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
-                recyclerView.scrollToPosition(0);
-                adapter.setMovies(movies);
-            } else {
-                adapter.setMovies(movies);
-            }
+        recyclerView.setVisibility(View.VISIBLE);
+        setTitle(getTitle(viewModel.getCurrentSearchType()));
+        if (viewModel.getCurrentPage() == 1 || viewModel.getCurrentSearchType().equals(MainViewModel.FAVORITES)) {
+            recyclerView.scrollToPosition(0);
         }
+        adapter.setMovies(movies);
     }
 
     private int getSpanCount() {
@@ -207,12 +199,12 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         int id = item.getItemId();
 
         if (id == R.id.sort_by_most_popular) {
-            loadMostPopularMovies();
+            loadNewMovies(MainViewModel.POPULAR, 1);
             return true;
         }
 
         if (id == R.id.sort_by_top_rated) {
-            loadTopRatedMovies();
+            loadNewMovies(MainViewModel.TOP_RATED, 1);
             return true;
         }
 
@@ -224,19 +216,11 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    private void loadTopRatedMovies() {
+    private void loadNewMovies(String searchType, Integer page) {
         if (!RetrofitUtils.isOnline(getApplicationContext())) {
             checkInternetConnection();
         } else {
-            queryMoviesService(MainViewModel.TOP_RATED, 1);
-        }
-    }
-
-    private void loadMostPopularMovies() {
-        if (!RetrofitUtils.isOnline(getApplicationContext())) {
-            checkInternetConnection();
-        } else {
-            queryMoviesService(MainViewModel.POPULAR, 1);
+            queryMoviesService(searchType, page);
         }
     }
 
