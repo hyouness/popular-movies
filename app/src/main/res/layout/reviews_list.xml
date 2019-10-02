@@ -1,24 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_reviews"
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:scrollbars="vertical"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="@dimen/inline_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/inline_horizontal_margin">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reviews"
+            android:textStyle="bold"
+            android:textSize="@dimen/details_text_size"
+            android:layout_alignParentStart="true"/>
 
-    <TextView
-        android:id="@+id/tv_error_message"
-        android:padding="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:visibility="invisible"
-        android:textSize="@dimen/error_message_text_size"
-        android:text="@string/error_message"/>
+        <ProgressBar
+            android:id="@+id/pb_reviews"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="end"
+            android:visibility="invisible"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
 
-</FrameLayout>
+    <FrameLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_reviews"
+            android:layout_width="match_parent"
+            android:scrollbars="vertical"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_error_message"
+            android:padding="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            android:textSize="@dimen/error_message_text_size"
+            android:text="@string/error_message"/>
+    </FrameLayout>
+</merge>

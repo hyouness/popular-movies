@@ -11,7 +11,7 @@
     <string name="overview" translatable="false">Overview</string>
     <string name="release_date" translatable="false">Release Date</string>
     <string name="vote" translatable="false">Vote</string>
-    <string name="favorite_movie_icon" translatable="false">Favorite Movie</string>
+    <string name="favorite_movie_icon" translatable="false">Mark Movie as Favorite</string>
     <string name="favorites" translatable="false">Favorites</string>
     <string name="no_favorites" translatable="false">No favorite movies were found.</string>
     <string name="dummy_text" translatable="false">Dummy Text</string>
