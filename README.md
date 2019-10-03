@@ -17,6 +17,7 @@ In Project 2 + 3 of the Udacity Android Developer Nanodegree Program, **Popular 
 2) Tap on movie posters to look up:
     - detailed info like original name, release date, and average rating.
     - movie reviews and videos if available
+    - mark movie as favorite
 
 ## ScreenShots
 
