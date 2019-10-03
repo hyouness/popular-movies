@@ -1,23 +1,30 @@
 # Popular Movies Project
 
 ## Project Overview
-In Project 2 of the Udacity Android Developer Nanodegree Program, **Popular Movies** app was developed in order to
-to allow users to discover the most popular movies playing by querying the [themoviedb.org](themoviedb.org) API.
+In Project 2 + 3 of the Udacity Android Developer Nanodegree Program, **Popular Movies** app was developed in order to test:
 
-The main focus of this project was to test API integration/interaction combined with JSON parsing and layout design(UX/UI).
+1) TMDB API integration/interaction combined with JSON parsing
+2) Layout design(UX/UI)
+3) MVVM architecture implementation (Live Data + View Model)
+4) Room DB implementation
 
 ## Features
 
-1) Look up the most popular or the most rated movies.
-2) Tap on movie posters to look up detailed info like original name, release date, overview etc...
+1) Look up through menu items:
+    - most popular movies
+    - top rated movies
+    - your favorite movies (stored in SQLite DB and available offline).
+2) Tap on movie posters to look up:
+    - detailed info like original name, release date, and average rating.
+    - movie reviews and videos if available
 
 ## ScreenShots
 
 ### Phone
-![](app/src/main/res/drawable/phone_list.png) ![](app/src/main/res/drawable/phone_details.png)
+![](app/src/main/res/drawable/phone_pop_movies.png) ![](app/src/main/res/drawable/phone_movie_details.png)
 
 ### Tablet
-![](app/src/main/res/drawable/tablet_list.png) ![](app/src/main/res/drawable/tablet_details.png)
+![](app/src/main/res/drawable/tablet_favorite_movies.png) ![](app/src/main/res/drawable/tablet_movie_details.png)
 
 ## How to run the project?
 
@@ -30,3 +37,6 @@ You need to acquire an API Key from themoviedb.org by following the steps below:
 
 ## Libraries
 * [Picasso](https://github.com/square/picasso)
+* [ButterKnife](https://github.com/JakeWharton/butterknife)
+* [Retrofit](https://square.github.io/retrofit/)
+* [RxMarkdown](https://github.com/yydcdut/RxMarkdown)
