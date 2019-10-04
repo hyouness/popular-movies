@@ -5,19 +5,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.example.popularmovies.R;
+import com.example.popularmovies.ReviewsViewHolder;
 import com.example.popularmovies.model.Review;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsViewHolder> {
+public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsViewHolder> {
 
     private List<Review> reviews = new ArrayList<>();
 
@@ -32,7 +28,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
     public ReviewsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
         View view = inflater.inflate(R.layout.reviews_list_item, viewGroup, false);
-        return new ReviewsViewHolder(view);
+        return new ReviewsViewHolder(this, view);
     }
 
     @Override
@@ -51,30 +47,11 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
         notifyDataSetChanged();
     }
 
-    class ReviewsViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.btn_expand)
-        ImageButton expandButton;
-        @BindView(R.id.tv_author)
-        TextView authorTV;
-        @BindView(R.id.tv_content)
-        TextView contentTV;
+    public List<Review> getReviews() {
+        return reviews;
+    }
 
-        ReviewsViewHolder(@NonNull View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-
-        void bind(Review review) {
-            authorTV.setText(review.getAuthor());
-            contentTV.setText(review.getContent());
-
-            expandButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onReviewItemClickListener.onReviewClick(reviews.get(getAdapterPosition()));
-                }
-            });
-        }
-
+    public void onReviewClick(Review review) {
+        onReviewItemClickListener.onReviewClick(review);
     }
 }
