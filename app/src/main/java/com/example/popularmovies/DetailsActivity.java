@@ -261,7 +261,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMovieDetails
 
     private void checkInternetConnection() {
         if (snackBar == null) {
-            snackBar = Snackbar.make(movieDetailsLayout, "Check your internet connection and Retry.", Snackbar.LENGTH_LONG);
+            snackBar = Snackbar.make(movieDetailsLayout, R.string.check_internet, Snackbar.LENGTH_LONG);
         }
         snackBar.show();
     }

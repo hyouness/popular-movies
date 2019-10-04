@@ -22,4 +22,5 @@
     <string name="no_videos" translatable="false">This movie does not have any videos yet.</string>
     <string name="dummy_review" translatable="false">Just like the Matrix series, the John Wick series is the child of; interesting concepts, mediocre direction, bad writing, bad dialogue, fine (OK) acting and good to great fight choreography…   John Wick 3 outstays its welcome and becomes tedious with all the boring twists and uninspired resolutions.  you\'ll watch it once, forget it ever existed and then never watch it again</string>
     <string name="expand_review" translatable="false">Expand Review</string>
+    <string name="check_internet" translatable="false">Check your internet connection and Retry.</string>
 </resources>
